@@ -8,6 +8,7 @@ static char *decimal_sprintInt(char *buf, int32_t value);
 
 void decimal_init(decimal *number, uint32_t capacity)
 {
+    uint32_t unit_count;
     uint32_t i;
 
     decimal_setFlags(number, 0);
@@ -16,8 +17,9 @@ void decimal_init(decimal *number, uint32_t capacity)
     decimal_setExponent(number, 0);
     decimal_setCapacity(number, capacity);
     decimal_setLength(number, 1);
-    for (i = 0; i < capacity; ++i) {
-        decimal_setSignificandDigit(number, i, 0);
+    unit_count = DECIMAL_UNIT_COUNT(capacity);
+    for (i = 0; i < unit_count; ++i) {
+        number->significand[i] = 0;
     }
 }
 
