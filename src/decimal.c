@@ -5,6 +5,18 @@ static char *decimal_sprintDigits(char *buf, uint8_t *digits, uint32_t offset,
 static char *decimal_padZero(char *buf, uint32_t count);
 static char *decimal_strncpy(char *buf, const char *source, uint32_t count);
 static char *decimal_sprintInt(char *buf, int32_t value);
+static void decimal_clearSignificand(decimal *number);
+
+static void decimal_clearSignificand(decimal *number)
+{
+    uint32_t unit_count;
+    uint32_t i;
+
+    unit_count = DECIMAL_UNIT_COUNT(decimal_getCapacity(number));
+    for (i = 0; i < unit_count; ++i) {
+        number->significand[i] = 0;
+    }
+}
 
 void decimal_init(decimal *number, uint32_t capacity)
 {
@@ -17,10 +29,7 @@ void decimal_init(decimal *number, uint32_t capacity)
     decimal_setExponent(number, 0);
     decimal_setCapacity(number, capacity);
     decimal_setLength(number, 1);
-    unit_count = DECIMAL_UNIT_COUNT(capacity);
-    for (i = 0; i < unit_count; ++i) {
-        number->significand[i] = 0;
-    }
+    decimal_clearSignificand(number);
 }
 
 bool decimal_isSignMinus(decimal *number)
@@ -71,7 +80,7 @@ void decimal_setZero(decimal *number)
     decimal_setKind(number, DECIMAL_KIND_FINITE);
     decimal_setExponent(number, 0);
     decimal_setLength(number, 1);
-    decimal_setSignificandDigit(number, 0, 0);
+    decimal_clearSignificand(number);
 }
 
 void decimal_setInfinite(decimal *number, uint32_t sign)
@@ -80,7 +89,7 @@ void decimal_setInfinite(decimal *number, uint32_t sign)
     decimal_setKind(number, DECIMAL_KIND_INFINITY);
     decimal_setExponent(number, 0);
     decimal_setLength(number, 1);
-    decimal_setSignificandDigit(number, 0, 0);
+    decimal_clearSignificand(number);
 }
 
 void decimal_setSNaN(decimal *number)
@@ -89,7 +98,7 @@ void decimal_setSNaN(decimal *number)
     decimal_setKind(number, DECIMAL_KIND_SNAN);
     decimal_setExponent(number, 0);
     decimal_setLength(number, 1);
-    decimal_setSignificandDigit(number, 0, 0);
+    decimal_clearSignificand(number);
 }
 
 void decimal_setQNaN(decimal *number)
@@ -98,7 +107,7 @@ void decimal_setQNaN(decimal *number)
     decimal_setKind(number, DECIMAL_KIND_QNAN);
     decimal_setExponent(number, 0);
     decimal_setLength(number, 1);
-    decimal_setSignificandDigit(number, 0, 0);
+    decimal_clearSignificand(number);
 }
 
 void decimal_negate(decimal *result, decimal *number)
