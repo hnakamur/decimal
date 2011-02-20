@@ -15,6 +15,10 @@
 #define false 0
 #endif
 
+#define DECIMAL_STR_NAN "NaN"
+#define DECIMAL_STR_SNAN "sNaN"
+#define DECIMAL_STR_INFINITY "Infinity"
+
 #define DECIMAL_SIGN_PLUS 0
 #define DECIMAL_SIGN_MINUS 1
 
@@ -22,18 +26,19 @@
 
 #define DECIMAL_KIND_BIT_MASK 0x00000006
 #define DECIMAL_KIND_FINITE 0x00000000
-#define DECIMAL_KIND_INFINITE 0x00000002
+#define DECIMAL_KIND_INFINITY 0x00000002
 #define DECIMAL_KIND_QNAN 0x00000004
 #define DECIMAL_KIND_SNAN 0x00000006
 
 #define DECIMAL_DEFAULT_CAPACITY 40
+#define DECIMAL_UNIT_COUNT(capacity) (((capacity) + 1) / 2)
 
 typedef struct {
     uint32_t flags;
     uint32_t exponent;
-    uint32_t capacity; /* coefficient capacity in digit count. */
-    uint32_t length;   /* coefficient length in digit count. */
-    uint8_t coefficient[DECIMAL_DEFAULT_CAPACITY / 2];
+    uint32_t capacity; /* significand capacity in digit count. */
+    uint32_t length;   /* significand length in digit count. */
+    uint8_t significand[DECIMAL_UNIT_COUNT(DECIMAL_DEFAULT_CAPACITY)];
 } decimal;
 
 void decimal_init(decimal *number, uint32_t capacity);

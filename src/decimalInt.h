@@ -3,6 +3,8 @@
 
 #include "decimal.h"
 
+#define DECIMAL_DIGITS "0123456789"
+
 #define decimal_setFlags(n, e) ((n)->flags = (e))
 #define decimal_getFlags(n) ((n)->flags)
 
@@ -26,18 +28,20 @@
 #define decimal_setLength(n, l) ((n)->length = (l))
 #define decimal_getLength(n) ((n)->length)
 
-#define decimal_setDigitInCoef(coef, pos, d) \
-    ((coef)[(pos) / 2] = ((pos) % 2 \
-        ? ((coef)[(pos) / 2] & 0xf0) | (d) \
-        : ((d) << 4) | ((coef)[(pos) / 2] & 0x0f)))
-#define decimal_getDigitInCoef(coef, pos) \
+#define decimal_setDigit(digits, pos, d) \
+    ((digits)[(pos) / 2] = ((pos) % 2 \
+        ? ((digits)[(pos) / 2] & 0xf0) | (d) \
+        : ((d) << 4) | ((digits)[(pos) / 2] & 0x0f)))
+#define decimal_getDigit(digits, pos) \
     ((pos) % 2 \
-        ? (coef)[(pos) / 2] & 0x0f \
-        : (coef)[(pos) / 2] >> 4)
+        ? (digits)[(pos) / 2] & 0x0f \
+        : (digits)[(pos) / 2] >> 4)
 
-#define decimal_setDigit(n, pos, d) \
-    decimal_setDigitInCoef((n)->coefficient, pos, d)
-#define decimal_getDigit(n, pos) \
-    decimal_getDigitInCoef((n)->coefficient, pos)
+#define decimal_setSignificandDigit(n, pos, d) \
+    decimal_setDigit((n)->significand, pos, d)
+#define decimal_getSignificandDigit(n, pos) \
+    decimal_getDigit((n)->significand, pos)
+
+uint32_t decimal_countDigitOfInt(int32_t value);
 
 #endif /* _DECIMAL_INT_H */
