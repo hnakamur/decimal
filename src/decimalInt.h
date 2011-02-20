@@ -28,20 +28,15 @@
 #define decimal_setLength(n, l) ((n)->length = (l))
 #define decimal_getLength(n) ((n)->length)
 
-#define decimal_setDigit(digits, pos, d) \
-    ((digits)[(pos) / 2] = ((pos) % 2 \
-        ? ((digits)[(pos) / 2] & 0xf0) | (d) \
-        : ((d) << 4) | ((digits)[(pos) / 2] & 0x0f)))
-#define decimal_getDigit(digits, pos) \
-    ((pos) % 2 \
-        ? (digits)[(pos) / 2] & 0x0f \
-        : (digits)[(pos) / 2] >> 4)
-
 #define decimal_setSignificandDigit(n, pos, d) \
     decimal_setDigit((n)->significand, pos, d)
 #define decimal_getSignificandDigit(n, pos) \
     decimal_getDigit((n)->significand, pos)
 
+void decimal_setDigit(uint8_t *digits, uint32_t pos, uint8_t digit);
+uint8_t decimal_getDigit(const uint8_t *digits, uint32_t pos);
+
 uint32_t decimal_countDigitOfInt(int32_t value);
+bool decimal_convertFromDecimalCharacter(decimal *number, const char *str);
 
 #endif /* _DECIMAL_INT_H */

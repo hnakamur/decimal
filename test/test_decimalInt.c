@@ -248,3 +248,154 @@ void test_convertToDecimalExponential(void)
     decimal_convertToDecimalExponential(buf, &d);
     cut_assert_equal_string("-sNaN", buf);
 }
+
+void test_convertFromDecimalCharacter()
+{
+    decimal d;
+
+    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "Infinity"));
+    cut_assert_true(decimal_isInfinite(&d));
+    cut_assert_false(decimal_isSignMinus(&d));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-INF"));
+    cut_assert_true(decimal_isInfinite(&d));
+    cut_assert_true(decimal_isSignMinus(&d));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "NaN"));
+    cut_assert_true(decimal_isQNaN(&d));
+    cut_assert_false(decimal_isSignMinus(&d));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "nan123"));
+    cut_assert_true(decimal_isQNaN(&d));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-sNaN"));
+    cut_assert_true(decimal_isSNaN(&d));
+    cut_assert_true(decimal_isSignMinus(&d));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "123"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(2, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-123"));
+    cut_assert_true(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(2, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "123E+3"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(5, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "123e5"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(7, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "12.3"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(1, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "0.00123"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(-3, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "0.00123E6"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(3, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "0.00123E-30"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(-33, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(1, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(2, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(3, decimal_getSignificandDigit(&d, 2));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, ".0"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(0, decimal_getExponent(&d));
+    cut_assert_equal_uint(2, decimal_getLength(&d));
+    cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 1));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, ".5"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(-1, decimal_getExponent(&d));
+    cut_assert_equal_uint(1, decimal_getLength(&d));
+    cut_assert_equal_uint(5, decimal_getSignificandDigit(&d, 0));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-.5"));
+    cut_assert_true(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(-1, decimal_getExponent(&d));
+    cut_assert_equal_uint(1, decimal_getLength(&d));
+    cut_assert_equal_uint(5, decimal_getSignificandDigit(&d, 0));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, ".50"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(-1, decimal_getExponent(&d));
+    cut_assert_equal_uint(2, decimal_getLength(&d));
+    cut_assert_equal_uint(5, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 1));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "0."));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(0, decimal_getExponent(&d));
+    cut_assert_equal_uint(1, decimal_getLength(&d));
+    cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 0));
+
+    cut_assert_false(decimal_convertFromDecimalCharacter(&d, "."));
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "0.00"));
+    cut_assert_false(decimal_isSignMinus(&d));
+    cut_assert_true(decimal_isFinite(&d));
+    cut_assert_equal_int(0, decimal_getExponent(&d));
+    cut_assert_equal_uint(3, decimal_getLength(&d));
+    cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 0));
+    cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 1));
+    cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 2));
+}

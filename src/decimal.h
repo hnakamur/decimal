@@ -35,7 +35,7 @@
 
 typedef struct {
     uint32_t flags;
-    uint32_t exponent;
+    int32_t exponent;
     uint32_t capacity; /* significand capacity in digit count. */
     uint32_t length;   /* significand length in digit count. */
     uint8_t significand[DECIMAL_UNIT_COUNT(DECIMAL_DEFAULT_CAPACITY)];
