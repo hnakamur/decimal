@@ -3,21 +3,22 @@
 
 #include "decimal.h"
 
-#define DECIMAL_DIGITS "0123456789"
+#define decimal_Radix 10
+#define decimal_Digits "0123456789"
 
-#define decimal_setFlags(n, e) ((n)->flags = (e))
-#define decimal_getFlags(n) ((n)->flags)
+#define decimal_NaNLiteral "NaN"
+#define decimal_sNaNLiteral "sNaN"
+#define decimal_InfinityLiteral "Infinity"
 
-#define decimal_setSign(n, s) \
-    ((n)->flags = ((s) \
-        ? ((n)->flags | DECIMAL_MINUS_SIGN_BIT) \
-        : ((n)->flags & ~DECIMAL_MINUS_SIGN_BIT)))
-#define decimal_getSign(n) ((n)->flags & DECIMAL_MINUS_SIGN_BIT)
-#define decimal_flipSign(n) ((n)->flags ^= DECIMAL_MINUS_SIGN_BIT)
+#define decimal_setMinusSign(n) ((n)->flags |= decimal_MinusSignBit)
+#define decimal_resetMinusSign(n) ((n)->flags &= ~decimal_MinusSignBit)
 
 #define decimal_setKind(n, k) \
-    ((n)->flags = ((n)->flags & ~DECIMAL_KIND_BIT_MASK) | (k))
-#define decimal_getKind(n) ((n)->flags & DECIMAL_KIND_BIT_MASK)
+    ((n)->flags = ((n)->flags & ~decimal_KindBitMask) | (k))
+#define decimal_getKind(n) ((n)->flags & decimal_KindBitMask)
+
+#define decimal_setSignaling(n) ((n)->flags |= decimal_SignalingBit)
+#define decimal_resetSignaling(n) ((n)->flags &= ~decimal_SignalingBit)
 
 #define decimal_setExponent(n, e) ((n)->exponent = (e))
 #define decimal_getExponent(n) ((n)->exponent)
@@ -38,6 +39,11 @@ uint8_t decimal_getDigit(const uint8_t *digits, uint32_t pos);
 
 uint32_t decimal_countDigitOfInt(int32_t value);
 bool decimal_convertFromDecimalCharacter(decimal *number, const char *str);
+
+void decimal_setZero(decimal *number);
+void decimal_setInfinite(decimal *number);
+void decimal_setSNaN(decimal *number);
+void decimal_setQNaN(decimal *number);
 
 void decimal_round(decimal *result, const decimal *number,
     DecimalContext *context);

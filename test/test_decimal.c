@@ -6,7 +6,7 @@ void test_isSignMinus(void)
 {
     decimal d;
 
-    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
+    decimal_init(&d, decimal_DefaultCapacity);
     decimal_setZero(&d);
     cut_assert_false(decimal_isSignMinus(&d));
 
@@ -18,7 +18,7 @@ void test_isZero(void)
 {
     decimal d;
 
-    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
+    decimal_init(&d, decimal_DefaultCapacity);
     decimal_setZero(&d);
     cut_assert_true(decimal_isZero(&d));
 }
@@ -27,14 +27,15 @@ void test_isFinite(void)
 {
     decimal d;
 
-    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
+    decimal_init(&d, decimal_DefaultCapacity);
     decimal_setZero(&d);
     cut_assert_true(decimal_isFinite(&d));
 
     decimal_negate(&d, &d);
     cut_assert_true(decimal_isFinite(&d));
 
-    decimal_setInfinite(&d, DECIMAL_SIGN_PLUS);
+    decimal_setInfinite(&d);
+    decimal_abs(&d, &d);
     cut_assert_false(decimal_isFinite(&d));
 
     decimal_negate(&d, &d);
@@ -51,28 +52,30 @@ void test_isInfinite(void)
 {
     decimal d;
 
-    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
-    decimal_setInfinite(&d, DECIMAL_SIGN_PLUS);
+    decimal_init(&d, decimal_DefaultCapacity);
+    decimal_setInfinite(&d);
+    decimal_abs(&d, &d);
     cut_assert_true(decimal_isInfinite(&d) && !decimal_isSignMinus(&d));
 
     decimal_negate(&d, &d);
     cut_assert_true(decimal_isInfinite(&d) && decimal_isSignMinus(&d));
 }
 
-void test_isSNaN(void)
+void test_isSignaling(void)
 {
     decimal d;
 
-    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
+    decimal_init(&d, decimal_DefaultCapacity);
     decimal_setSNaN(&d);
-    cut_assert_true(decimal_isSNaN(&d));
+    cut_assert_true(decimal_isSignaling(&d));
 }
 
-void test_isQNaN(void)
+void test_isNaN(void)
 {
     decimal d;
 
-    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
+    decimal_init(&d, decimal_DefaultCapacity);
     decimal_setQNaN(&d);
-    cut_assert_true(decimal_isQNaN(&d));
+    cut_assert_true(decimal_isNaN(&d));
+    cut_assert_false(decimal_isSignaling(&d));
 }
