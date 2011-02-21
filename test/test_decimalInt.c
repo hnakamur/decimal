@@ -421,56 +421,56 @@ void test_roundTowardZero()
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.23450"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(0, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1E1000"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
@@ -478,7 +478,7 @@ void test_roundTowardZero()
     decimal_convertToDecimalExponential(buf, &d);
     cut_assert_equal_string("9.9999E+999", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.23E1000"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
@@ -502,84 +502,84 @@ void test_roundTowardPositive()
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2350", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.239951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2400", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.299951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.3000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("2.0000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "9.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("10.000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.23450"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(0, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
@@ -593,7 +593,7 @@ void test_roundTowardPositive()
     cut_assert_true(decimal_isInfinite(&d));
     cut_assert_false(decimal_isSignMinus(&d));
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1E1000"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
@@ -617,84 +617,84 @@ void test_roundTowardNegative()
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2350", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.239951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2400", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.299951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.3000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-2.0000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-9.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-10.000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.23450"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(0, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
@@ -708,7 +708,7 @@ void test_roundTowardNegative()
     cut_assert_true(decimal_isInfinite(&d));
     cut_assert_true(decimal_isSignMinus(&d));
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1E1000"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
@@ -732,98 +732,98 @@ void test_roundTiesToAway()
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234650"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2347", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2350", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.239951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2400", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.299951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.3000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-2.0000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-9.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-10.000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.23450"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(0, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234650"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
@@ -846,98 +846,98 @@ void test_roundTiesToEven()
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234650"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2350", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.239951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2400", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.299951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.3000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-2.0000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-9.999951"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-10.000", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.23450"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(0, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234549"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234550"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234551"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2346", buf);
 
-    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    DecimalContext_lowerFlags(&ctx, decimal_AllExceptions);
     cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.234650"));
     decimal_round(&d, &d, &ctx);
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));

@@ -17,7 +17,8 @@ typedef enum {
 #define decimal_Underflow        0x00000004
 #define decimal_DivisionByZero   0x00000008
 #define decimal_InvalidOperation 0x00000010
-#define decimal_AllFlags         0x0000001F
+
+#define decimal_AllExceptions    0x0000001F
 
 typedef struct {
     uint32_t precision;
