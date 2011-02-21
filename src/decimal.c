@@ -695,125 +695,132 @@ static bool decimal_hasAllZeroDigits(const decimal *number, uint32_t offset,
 void decimal_round(decimal *result, const decimal *number,
     DecimalContext *context)
 {
-    uint32_t precision;
+    uint32_t prec;
     uint32_t i;
     uint32_t flags;
     uint8_t digit;
+    bool wasAllZero;
     bool restWasAllZero;
     int32_t emax;
 
     decimal_copy(result, number);
-    precision = DecimalContext_getPrecision(context);
-    if (decimal_getLength(number) <= precision) {
-        return;
-    }
-
+    prec = DecimalContext_getPrecision(context);
     emax = DecimalContext_getMaxExponent(context);
     flags = 0;
     switch (DecimalContext_getRounding(context)) {
     case decimal_RoundTiesToEven:
-        digit = decimal_getSignificandDigit(number, precision);
-        restWasAllZero = decimal_hasAllZeroDigits(number, precision + 1,
-            decimal_getLength(number) - (precision + 1));
-        if (!(digit == 0 && restWasAllZero)) {
-            flags |= decimal_Inexact;
-            decimal_zeroDigits(result, precision,
-                decimal_getLength(result) - precision);
-        }
-        decimal_setLength(result, precision);
-        if (digit > 5
-            || (digit == 5
-                && (!restWasAllZero
-                    || (decimal_getSignificandDigit(number, precision - 1) % 2)
-                   )
-               )
-        ) {
-            decimal_incrementMagnitude(result, context);
+        if (decimal_getLength(number) > prec) {
+            digit = decimal_getSignificandDigit(number, prec);
+            restWasAllZero = decimal_hasAllZeroDigits(number, prec + 1,
+                decimal_getLength(number) - (prec + 1));
+            if (!(digit == 0 && restWasAllZero)) {
+                flags |= decimal_Inexact;
+                decimal_zeroDigits(result, prec,
+                    decimal_getLength(result) - prec);
+            }
+            decimal_setLength(result, prec);
+            if (digit > 5
+                || (digit == 5
+                    && (!restWasAllZero
+                        || (decimal_getSignificandDigit(number, prec - 1) % 2)))
+            ) {
+                decimal_incrementMagnitude(result, context);
+            }
         }
 
         if (decimal_getExponent(result) > emax) {
             decimal_setInfinite(result);
-            flags |= decimal_Overflow;
+            flags |= decimal_Inexact | decimal_Overflow;
         }
         break;
     case decimal_RoundTiesToAway:
-        digit = decimal_getSignificandDigit(number, precision);
-        if (!decimal_hasAllZeroDigits(number, precision,
-            decimal_getLength(number) - precision)
-        ) {
-            flags |= decimal_Inexact;
-            decimal_zeroDigits(result, precision,
-                decimal_getLength(result) - precision);
-        }
-        decimal_setLength(result, precision);
-        if (flags && digit >= 5) {
-            decimal_incrementMagnitude(result, context);
+        if (decimal_getLength(number) > prec) {
+            digit = decimal_getSignificandDigit(number, prec);
+            wasAllZero = decimal_hasAllZeroDigits(number, prec,
+                decimal_getLength(number) - prec);
+            if (!wasAllZero) {
+                flags |= decimal_Inexact;
+                decimal_zeroDigits(result, prec,
+                    decimal_getLength(result) - prec);
+            }
+            decimal_setLength(result, prec);
+            if (!wasAllZero && digit >= 5) {
+                decimal_incrementMagnitude(result, context);
+            }
         }
 
         if (decimal_getExponent(result) > emax) {
             decimal_setInfinite(result);
-            flags |= decimal_Overflow;
+            flags |= decimal_Inexact | decimal_Overflow;
         }
         break;
     case decimal_RoundTowardPositive:
-        if (!decimal_hasAllZeroDigits(number, precision,
-            decimal_getLength(number) - precision)
-        ) {
-            flags |= decimal_Inexact;
-            decimal_zeroDigits(result, precision,
-                decimal_getLength(result) - precision);
+        wasAllZero = true;
+        if (decimal_getLength(number) > prec) {
+            wasAllZero = decimal_hasAllZeroDigits(number, prec,
+                decimal_getLength(number) - prec);
+            if (!wasAllZero) {
+                flags |= decimal_Inexact;
+                decimal_zeroDigits(result, prec,
+                    decimal_getLength(result) - prec);
+            }
+            decimal_setLength(result, prec);
         }
-        decimal_setLength(result, precision);
-        if (flags && !decimal_isSignMinus(number)) {
+        if (!wasAllZero && !decimal_isSignMinus(number)) {
             decimal_incrementMagnitude(result, context);
 
             if (decimal_getExponent(result) > emax) {
                 decimal_setInfinite(result);
-                flags |= decimal_Overflow;
+                flags |= decimal_Inexact | decimal_Overflow;
             }
         } else {
             if (decimal_getExponent(result) > emax) {
                 decimal_setLargestFiniteMagnitude(result, context);
-                flags |= decimal_Overflow;
+                flags |= decimal_Inexact | decimal_Overflow;
             }
         }
         break;
     case decimal_RoundTowardNegative:
-        if (!decimal_hasAllZeroDigits(number, precision,
-            decimal_getLength(number) - precision)
-        ) {
-            flags |= decimal_Inexact;
-            decimal_zeroDigits(result, precision,
-                decimal_getLength(result) - precision);
+        if (decimal_getLength(number) > prec) {
+            wasAllZero = decimal_hasAllZeroDigits(number, prec,
+                decimal_getLength(number) - prec);
+            if (!wasAllZero) {
+                flags |= decimal_Inexact;
+                decimal_zeroDigits(result, prec,
+                    decimal_getLength(result) - prec);
+            }
+            decimal_setLength(result, prec);
         }
-        decimal_setLength(result, precision);
         if (flags && decimal_isSignMinus(number)) {
             decimal_incrementMagnitude(result, context);
 
             if (decimal_getExponent(result) > emax) {
                 decimal_setInfinite(result);
-                flags |= decimal_Overflow;
+                flags |= decimal_Inexact | decimal_Overflow;
             }
         } else {
             if (decimal_getExponent(result) > emax) {
                 decimal_setLargestFiniteMagnitude(result, context);
-                flags |= decimal_Overflow;
+                flags |= decimal_Inexact | decimal_Overflow;
             }
         }
         break;
     case decimal_RoundTowardZero:
-        if (!decimal_hasAllZeroDigits(number, precision,
-            decimal_getLength(number) - precision)
-        ) {
-            flags |= decimal_Inexact;
-            decimal_zeroDigits(result, precision,
-                decimal_getLength(result) - precision);
+        wasAllZero = true;
+        if (decimal_getLength(number) > prec) {
+            wasAllZero = decimal_hasAllZeroDigits(number, prec,
+                decimal_getLength(number) - prec);
+            if (!wasAllZero) {
+                flags |= decimal_Inexact;
+                decimal_zeroDigits(result, prec,
+                    decimal_getLength(result) - prec);
+            }
+            decimal_setLength(result, prec);
         }
-        decimal_setLength(result, precision);
 
         if (decimal_getExponent(result) > emax) {
             decimal_setLargestFiniteMagnitude(result, context);
-            flags |= decimal_Overflow;
+            flags |= decimal_Inexact | decimal_Overflow;
         }
         break;
     default:

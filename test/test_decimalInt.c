@@ -469,6 +469,22 @@ void test_roundTowardZero()
     cut_assert_equal_uint(decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2345", buf);
+
+    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1E1000"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
+        DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalExponential(buf, &d);
+    cut_assert_equal_string("9.9999E+999", buf);
+
+    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1.23E1000"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
+        DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalExponential(buf, &d);
+    cut_assert_equal_string("-9.9999E+999", buf);
 }
 
 void test_roundTowardPositive()
@@ -576,6 +592,14 @@ void test_roundTowardPositive()
         DecimalContext_saveAllFlags(&ctx));
     cut_assert_true(decimal_isInfinite(&d));
     cut_assert_false(decimal_isSignMinus(&d));
+
+    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "-1E1000"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
+        DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalExponential(buf, &d);
+    cut_assert_equal_string("-9.9999E+999", buf);
 }
 
 void test_roundTowardNegative()
@@ -683,6 +707,14 @@ void test_roundTowardNegative()
         DecimalContext_saveAllFlags(&ctx));
     cut_assert_true(decimal_isInfinite(&d));
     cut_assert_true(decimal_isSignMinus(&d));
+
+    DecimalContext_lowerFlags(&ctx, decimal_AllFlags);
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1E1000"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(decimal_Inexact | decimal_Overflow,
+        DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalExponential(buf, &d);
+    cut_assert_equal_string("9.9999E+999", buf);
 }
 
 void test_roundTiesToAway()
