@@ -35,6 +35,8 @@ typedef struct {
     (((n)->flags & decimal_KindBitMask) == decimal_KindNaN)
 #define decimal_isSignaling(n) (((n)->flags & decimal_SignalingBit) != 0)
 
+bool decimal_isNormal(const decimal *number);
+bool decimal_isSubnormal(const decimal *number);
 bool decimal_isZero(const decimal *number);
 
 void decimal_init(decimal *number, uint32_t capacity);

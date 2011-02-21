@@ -50,6 +50,19 @@ void decimal_init(decimal *number, uint32_t capacity)
     decimal_clearSignificand(number);
 }
 
+bool decimal_isNormal(const decimal *number)
+{
+    return decimal_isFinite(number)
+        && decimal_getSignificandDigit(number, 0) != 0;
+}
+
+bool decimal_isSubnormal(const decimal *number)
+{
+    return decimal_isFinite(number)
+        && decimal_getSignificandDigit(number, 0) == 0
+        && !decimal_isZero(number);
+}
+
 bool decimal_isZero(const decimal *number)
 {
     uint32_t i;
