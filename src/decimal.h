@@ -2,18 +2,8 @@
 #define _DECIMAL_H 1
 
 #include <stdint.h>
-
-#ifndef bool
-#define bool int
-#endif
-
-#ifndef true
-#define true 1
-#endif
-
-#ifndef false
-#define false 0
-#endif
+#include "bool.h"
+#include "DecimalContext.h"
 
 #define DECIMAL_STR_NAN "NaN"
 #define DECIMAL_STR_SNAN "sNaN"
@@ -57,7 +47,7 @@ void decimal_setSNaN(decimal *number);
 void decimal_setQNaN(decimal *number);
 
 
-void decimal_negate(decimal *result, decimal *number);
-void decimal_copy(decimal *result, decimal *number);
+void decimal_negate(decimal *result, const decimal *number);
+void decimal_copy(decimal *result, const decimal *number);
 
 #endif /* _DECIMAL_H */

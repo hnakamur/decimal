@@ -39,4 +39,7 @@ uint8_t decimal_getDigit(const uint8_t *digits, uint32_t pos);
 uint32_t decimal_countDigitOfInt(int32_t value);
 bool decimal_convertFromDecimalCharacter(decimal *number, const char *str);
 
+void decimal_round(decimal *result, const decimal *number,
+    DecimalContext *context);
+
 #endif /* _DECIMAL_INT_H */

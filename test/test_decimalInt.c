@@ -399,3 +399,45 @@ void test_convertFromDecimalCharacter()
     cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 1));
     cut_assert_equal_uint(0, decimal_getSignificandDigit(&d, 2));
 }
+
+void test_roundTowardZero()
+{
+    decimal d;
+    DecimalContext ctx;
+    char buf[36];
+
+    decimal_init(&d, DECIMAL_DEFAULT_CAPACITY);
+    DecimalContext_init(&ctx, 5, Decimal_RoundTowardZero);
+
+/*
+bsrx426  toSci  1.23450    ->  1.2345  Rounded
+bsrx427  toSci  1.234549   ->  1.2345  Rounded Inexact
+bsrx428  toSci  1.234550   ->  1.2345  Rounded Inexact
+bsrx429  toSci  1.234551   ->  1.2345  Rounded Inexact
+*/
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.23450"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(0, DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalNonExponential(buf, &d);
+    cut_assert_equal_string("1.2345", buf);
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234549"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(Decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalNonExponential(buf, &d);
+    cut_assert_equal_string("1.2345", buf);
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234550"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(Decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalNonExponential(buf, &d);
+    cut_assert_equal_string("1.2345", buf);
+
+    cut_assert_true(decimal_convertFromDecimalCharacter(&d, "1.234551"));
+    decimal_round(&d, &d, &ctx);
+    cut_assert_equal_uint(Decimal_Inexact, DecimalContext_saveAllFlags(&ctx));
+    decimal_convertToDecimalNonExponential(buf, &d);
+    cut_assert_equal_string("1.2345", buf);
+
+}

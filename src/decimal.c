@@ -118,17 +118,15 @@ void decimal_setQNaN(decimal *number)
     decimal_clearSignificand(number);
 }
 
-void decimal_negate(decimal *result, decimal *number)
+void decimal_negate(decimal *result, const decimal *number)
 {
     decimal_copy(result, number);
     decimal_flipSign(result);
 }
 
-void decimal_copy(decimal *result, decimal *number)
+void decimal_copy(decimal *result, const decimal *number)
 {
-    if (result != number) {
-        *result = *number;
-    }
+    *result = *number;
 }
 
 bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
@@ -622,4 +620,40 @@ void decimal_setDigit(uint8_t *digits, uint32_t pos, uint8_t digit)
 uint8_t decimal_getDigit(const uint8_t *digits, uint32_t pos)
 {
     return pos % 2 ? digits[pos / 2] & 0x0f : digits[pos / 2] >> 4;
+}
+
+void decimal_round(decimal *result, const decimal *number,
+    DecimalContext *context)
+{
+    uint32_t precision;
+    uint32_t i;
+
+    decimal_copy(result, number);
+    precision = DecimalContext_getPrecision(context);
+    if (decimal_getLength(number) <= precision) {
+        return;
+    }
+
+    switch (DecimalContext_getRounding(context)) {
+    case Decimal_RoundTiesToEven:
+        break;
+    case Decimal_RoundTiesToAway:
+        break;
+    case Decimal_RoundTowardPositive:
+        break;
+    case Decimal_RoundTowardNegative:
+        break;
+    case Decimal_RoundTowardZero:
+        for (i = precision + 1; i < decimal_getLength(number); ++i) {
+            if (decimal_getSignificandDigit(number, i) != 0) {
+                DecimalContext_raiseFlags(context, Decimal_Inexact);
+            }
+            decimal_setSignificandDigit(result, i, 0);
+        }
+        decimal_setLength(result, precision);
+        break;
+    default:
+        DecimalContext_raiseFlags(context, Decimal_InvalidOperation);
+        break;
+    }
 }
