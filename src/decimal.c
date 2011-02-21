@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "decimalInt.h"
 
@@ -14,6 +16,11 @@ static void decimal_setDigitsWithChars(decimal *number, const char *chars,
     uint32_t count);
 static bool decimal_isDigitsStr(const char *str);
 static void decimal_setDigitsWithStr(decimal *number, const char *str);
+
+static void decimal_zeroDigits(decimal *number, uint32_t offset,
+    uint32_t count);
+static bool decimal_hasAllZeroDigits(const decimal *number, uint32_t offset,
+    uint32_t count);
 
 static void decimal_clearSignificand(decimal *number)
 {
@@ -40,37 +47,37 @@ void decimal_init(decimal *number, uint32_t capacity)
     decimal_clearSignificand(number);
 }
 
-bool decimal_isSignMinus(decimal *number)
+bool decimal_isSignMinus(const decimal *number)
 {
     return decimal_getSign(number) == DECIMAL_SIGN_MINUS;
 }
 
-bool decimal_isNaN(decimal *number)
+bool decimal_isNaN(const decimal *number)
 {
     return decimal_isSNaN(number) || decimal_isQNaN(number);
 }
 
-bool decimal_isSNaN(decimal *number)
+bool decimal_isSNaN(const decimal *number)
 {
     return decimal_getKind(number) == DECIMAL_KIND_SNAN;
 }
 
-bool decimal_isQNaN(decimal *number)
+bool decimal_isQNaN(const decimal *number)
 {
     return decimal_getKind(number) == DECIMAL_KIND_QNAN;
 }
 
-bool decimal_isInfinite(decimal *number)
+bool decimal_isInfinite(const decimal *number)
 {
     return decimal_getKind(number) == DECIMAL_KIND_INFINITY;
 }
 
-bool decimal_isFinite(decimal *number)
+bool decimal_isFinite(const decimal *number)
 {
     return decimal_getKind(number) == DECIMAL_KIND_FINITE;
 }
 
-bool decimal_isZero(decimal *number)
+bool decimal_isZero(const decimal *number)
 {
     uint32_t i;
 
@@ -622,11 +629,66 @@ uint8_t decimal_getDigit(const uint8_t *digits, uint32_t pos)
     return pos % 2 ? digits[pos / 2] & 0x0f : digits[pos / 2] >> 4;
 }
 
+static void decimal_increment(decimal *number, DecimalContext *context)
+{
+    int32_t i;
+    uint8_t digit;
+    uint32_t length;
+
+    for (i = decimal_getLength(number) - 1; i >= 0; --i) {
+        digit = decimal_getSignificandDigit(number, i) + 1;
+        if (digit < Decimal_Radix) {
+            decimal_setSignificandDigit(number, i, digit);
+            return;
+        } else {
+            decimal_setSignificandDigit(number, i, 0);
+        }
+    }
+
+    if (decimal_getLength(number) < DecimalContext_getPrecision(context) &&
+        decimal_getLength(number) < decimal_getCapacity(number)
+    ) {
+        decimal_setLength(number, decimal_getLength(number) + 1);
+    }
+    for (i = decimal_getLength(number) - 1; i > 0; --i) {
+        decimal_setSignificandDigit(number, i,
+            decimal_getSignificandDigit(number, i - 1));
+    }
+    decimal_setSignificandDigit(number, 0, 1);
+    decimal_setExponent(number, decimal_getExponent(number) + 1);
+}
+
+static void decimal_zeroDigits(decimal *number, uint32_t offset,
+    uint32_t count)
+{
+    uint32_t i;
+
+    for (i = 0; i < count; ++i) {
+        decimal_setSignificandDigit(number, i + offset, 0);
+    }
+}
+
+static bool decimal_hasAllZeroDigits(const decimal *number, uint32_t offset,
+    uint32_t count)
+{
+    uint32_t i;
+
+    for (i = 0; i < count; ++i) {
+        if (decimal_getSignificandDigit(number, i + offset) != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void decimal_round(decimal *result, const decimal *number,
     DecimalContext *context)
 {
     uint32_t precision;
     uint32_t i;
+    uint32_t flags;
+    uint8_t digit;
+    bool restWasAllZero;
 
     decimal_copy(result, number);
     precision = DecimalContext_getPrecision(context);
@@ -634,26 +696,100 @@ void decimal_round(decimal *result, const decimal *number,
         return;
     }
 
+    flags = 0;
     switch (DecimalContext_getRounding(context)) {
     case Decimal_RoundTiesToEven:
+        digit = decimal_getSignificandDigit(number, precision);
+        restWasAllZero = decimal_hasAllZeroDigits(number, precision + 1,
+            decimal_getLength(number) - (precision + 1));
+        if (!(digit == 0 && restWasAllZero)) {
+            flags |= Decimal_Inexact;
+            decimal_zeroDigits(result, precision,
+                decimal_getLength(result) - precision);
+        }
+        decimal_setLength(result, precision);
+        if (digit > 5
+            || (digit == 5
+                && (!restWasAllZero
+                    || (decimal_getSignificandDigit(number, precision - 1) % 2)
+                   )
+               )
+        ) {
+            decimal_increment(result, context);
+        }
         break;
     case Decimal_RoundTiesToAway:
+        digit = decimal_getSignificandDigit(number, precision);
+        if (!decimal_hasAllZeroDigits(number, precision,
+            decimal_getLength(number) - precision)
+        ) {
+            flags |= Decimal_Inexact;
+            decimal_zeroDigits(result, precision,
+                decimal_getLength(result) - precision);
+        }
+        decimal_setLength(result, precision);
+        if (flags && digit >= 5) {
+            decimal_increment(result, context);
+        }
         break;
     case Decimal_RoundTowardPositive:
+        if (!decimal_hasAllZeroDigits(number, precision,
+            decimal_getLength(number) - precision)
+        ) {
+            flags |= Decimal_Inexact;
+            decimal_zeroDigits(result, precision,
+                decimal_getLength(result) - precision);
+        }
+        decimal_setLength(result, precision);
+        if (flags && !decimal_isSignMinus(number)) {
+            decimal_increment(result, context);
+        }
         break;
     case Decimal_RoundTowardNegative:
+        if (!decimal_hasAllZeroDigits(number, precision,
+            decimal_getLength(number) - precision)
+        ) {
+            flags |= Decimal_Inexact;
+            decimal_zeroDigits(result, precision,
+                decimal_getLength(result) - precision);
+        }
+        decimal_setLength(result, precision);
+        if (flags && decimal_isSignMinus(number)) {
+            decimal_increment(result, context);
+        }
         break;
     case Decimal_RoundTowardZero:
-        for (i = precision + 1; i < decimal_getLength(number); ++i) {
-            if (decimal_getSignificandDigit(number, i) != 0) {
-                DecimalContext_raiseFlags(context, Decimal_Inexact);
-            }
-            decimal_setSignificandDigit(result, i, 0);
+        if (!decimal_hasAllZeroDigits(number, precision,
+            decimal_getLength(number) - precision)
+        ) {
+            flags |= Decimal_Inexact;
+            decimal_zeroDigits(result, precision,
+                decimal_getLength(result) - precision);
         }
         decimal_setLength(result, precision);
         break;
     default:
-        DecimalContext_raiseFlags(context, Decimal_InvalidOperation);
+        flags |= Decimal_InvalidOperation;
         break;
+    }
+    DecimalContext_raiseFlags(context, flags);
+}
+
+void decimal_debugPrintDecimalExponential(decimal *number)
+{
+    char buf[512];
+    uint32_t length;
+    char *p;
+
+    length = decimal_getLengthOfDecimalNonExponential(number) + 1;
+    if (length <= sizeof(buf)) {
+        p = buf;
+    } else {
+        p = (char *)malloc(sizeof(char) * length);
+    }
+    decimal_convertToDecimalExponential(p, number);
+    printf("%s\n", p);
+    if (p != buf) {
+        free(p);
     }
 }

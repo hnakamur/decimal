@@ -5,6 +5,8 @@
 #include "bool.h"
 #include "DecimalContext.h"
 
+#define Decimal_Radix 10
+
 #define DECIMAL_STR_NAN "NaN"
 #define DECIMAL_STR_SNAN "sNaN"
 #define DECIMAL_STR_INFINITY "Infinity"
@@ -33,13 +35,13 @@ typedef struct {
 
 void decimal_init(decimal *number, uint32_t capacity);
 
-bool decimal_isSignMinus(decimal *number);
-bool decimal_isNaN(decimal *number);
-bool decimal_isSNaN(decimal *number);
-bool decimal_isQNaN(decimal *number);
-bool decimal_isInfinite(decimal *number);
-bool decimal_isFinite(decimal *number);
-bool decimal_isZero(decimal *number);
+bool decimal_isSignMinus(const decimal *number);
+bool decimal_isNaN(const decimal *number);
+bool decimal_isSNaN(const decimal *number);
+bool decimal_isQNaN(const decimal *number);
+bool decimal_isInfinite(const decimal *number);
+bool decimal_isFinite(const decimal *number);
+bool decimal_isZero(const decimal *number);
 
 void decimal_setZero(decimal *number);
 void decimal_setInfinite(decimal *number, uint32_t sign);
