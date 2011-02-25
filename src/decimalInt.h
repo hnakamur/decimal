@@ -5,6 +5,7 @@
 
 #define decimal_Radix 10
 #define decimal_Digits "0123456789"
+#define decimal_HexDigits "0123456789ABCDEF"
 
 #define decimal_NaNLiteral "NaN"
 #define decimal_sNaNLiteral "sNaN"
@@ -47,5 +48,8 @@ void decimal_setQNaN(decimal *number);
 
 void decimal_round(decimal *result, const decimal *number,
     DecimalContext *context);
+
+int32_t decimal__encodeDPD(const int32_t *digit);
+void decimal__decodeDPD(int32_t *digit, int32_t dpd);
 
 #endif /* _DECIMAL_INT_H */
