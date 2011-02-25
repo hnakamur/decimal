@@ -25,10 +25,10 @@ typedef struct {
 } dec128;
 
 typedef enum {
-    dec128__kindFinite,
-    dec128__kindInfinite,
-    dec128__kindQNaN,
-    dec128__kindSNaN
+    dec128__kind_Finite,
+    dec128__kind_Infinite,
+    dec128__kind_QNaN,
+    dec128__kind_SNaN
 } dec128__kind;
 
 #define dec128__wk_DigitCapacity (dec128_Precision + 4 + 1)

@@ -4,17 +4,30 @@
 
 #define dec128__G1G2Mask         0x60
 #define dec128__TrailSigMask     0x3F
-#define dec128__LeadSigMaskCase1 0x04
-#define dec128__LeadSigMaskCase2 0x1C
 
-#define dec128__DigitCountPerDeclet 3
 #define dec128__DecletCount \
-    ((dec128_Precision - 1) / dec128__DigitCountPerDeclet)
+    ((dec128_Precision - 1) / decimal__DigitCountPerDeclet)
 
 #define dec128__isSigCase1(n) \
     (((n)->byte[0] & dec128__G1G2Mask) == dec128__G1G2Mask)
 
 static uint32_t dec128__clength(dec128 *n);
+
+static int32_t dec128__getExponent(dec128 *n)
+{
+    return ((n->byte[0] >> (dec128__isSigCase1(n) ? 3 : 5) & 0x3) << 12
+        | (n->byte[0] & 0x3) << 10
+        | n->byte[1] << 2
+        | n->byte[2] >> 6)
+        - dec128_Bias;
+}
+
+static uint32_t dec128__getLeadDigit(dec128 *n)
+{
+    return dec128__isSigCase1(n) 
+        ? 8 | n->byte[0] >> 2 & 0x1
+        : n->byte[0] >> 2 & 0x7;
+}
 
 static dec128__isByteRangeAllZero(dec128 *n, int start, int end)
 {
@@ -31,9 +44,8 @@ static dec128__isByteRangeAllZero(dec128 *n, int start, int end)
 bool dec128_isZero(dec128 *n)
 {
     return dec128_isFinite(n)
-        && dec128__isSigCase1(n)
-        && n->byte[0] & dec128__LeadSigMaskCase1 == 0
-        && n->byte[2] & dec128__TrailSigMask == 0
+        && dec128__getLeadDigit(n) == 0
+        && (n->byte[2] & dec128__TrailSigMask) == 0
         && dec128__isByteRangeAllZero(n, 3, dec128__ByteLength);
 }
 
@@ -101,8 +113,6 @@ static int32_t dec128__getDeclet(dec128 *n, uint32_t offset)
         return (n->byte[13] & 0x0F) << 2 | (n->byte[14] >> 2);
     case 10:
         return (n->byte[14] & 0x03) << 8 | n->byte[15];
-    default:
-        return -1;
     }
 }
 
@@ -111,9 +121,9 @@ static uint32_t dec128__clength(dec128 *n)
     int32_t i;
     int32_t j;
     int32_t declet;
-    int32_t digit[dec128__DigitCountPerDeclet];
+    int32_t digit[decimal__DigitCountPerDeclet];
 
-    if (dec128__isSigCase1(n) || (n->byte[0] & dec128__LeadSigMaskCase2)) {
+    if (dec128__getLeadDigit(n)) {
         return dec128_Precision;
     }
 
@@ -121,38 +131,15 @@ static uint32_t dec128__clength(dec128 *n)
         declet = dec128__getDeclet(n, i);
         if (declet != 0) {
             decimal__decodeDPD(digit, declet);
-            for (j = 0; j < dec128__DigitCountPerDeclet; ++j) {
-                if (digit[j] != 0) {
+            for (j = 0; j < decimal__DigitCountPerDeclet; ++j) {
+                if (digit[j]) {
                     return dec128_Precision
-                        - (i * dec128__DigitCountPerDeclet + j);
+                        - (i * decimal__DigitCountPerDeclet + j);
                 }
             }
         }
     }
     return 1;
-}
-
-static int32_t dec128__getExponent(dec128 *n)
-{
-    return ((n->byte[0] >> (dec128__isSigCase1(n) ? 3 : 5) & 0x3) << 12
-        | (n->byte[0] & 0x3) << 10
-        | n->byte[1] << 2
-        | n->byte[2] >> 6)
-        - dec128_Bias;
-}
-
-/**
- * a20780
- * 10100010 00000111 10000000
- *  01   10 00000111 10
- *  01 10 0001 1110
- *
- */
-static uint32_t dec128__getLeadDigit(dec128 *n)
-{
-    return dec128__isSigCase1(n) 
-        ? 8 | n->byte[0] >> 2 & 0x1
-        : n->byte[0] >> 2 & 0x7;
 }
 
 /*
@@ -191,10 +178,10 @@ bool dec128__wk_convertFromDec128(dec128__wk *result, const dec128 *n)
     char *p;
 
     result->sign = dec128_isSignMinus(n) ? 1 : 0;
-    result->kind = dec128_isFinite(n) ? dec128__kindFinite
-        : dec128_isInfinite(n) ? dec128__kindInfinite
-        : dec128_isSignaling(n) ? dec128__kindSNaN
-        : dec128__kindQNaN;
+    result->kind = dec128_isFinite(n) ? dec128__kind_Finite
+        : dec128_isInfinite(n) ? dec128__kind_Infinite
+        : dec128_isSignaling(n) ? dec128__kind_SNaN
+        : dec128__kind_QNaN;
 
     result->q = dec128__getExponent(n);
 
@@ -228,18 +215,18 @@ bool dec128__initWithRawHexString(dec128 *n, const char *hex)
 
     for (i = 0; i < len; i += 2) {
         hi = toupper(hex[i]);
-        p = strchr(decimal_HexDigits, hi);
+        p = strchr(decimal__HexDigits, hi);
         if (!p) {
             return false;
         }
-        hi = p - decimal_HexDigits;
+        hi = p - decimal__HexDigits;
 
         lo = toupper(hex[i + 1]);
-        p = strchr(decimal_HexDigits, lo);
+        p = strchr(decimal__HexDigits, lo);
         if (!p) {
             return false;
         }
-        lo = p - decimal_HexDigits;
+        lo = p - decimal__HexDigits;
 
         *dest++ = hi << 4 | lo;
     }

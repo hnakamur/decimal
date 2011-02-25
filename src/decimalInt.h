@@ -3,9 +3,10 @@
 
 #include "decimal.h"
 
-#define decimal_Radix 10
-#define decimal_Digits "0123456789"
-#define decimal_HexDigits "0123456789ABCDEF"
+#define decimal__Radix 10
+#define decimal__Digits "0123456789"
+#define decimal__HexDigits "0123456789ABCDEF"
+#define decimal__DigitCountPerDeclet 3
 
 #define decimal_NaNLiteral "NaN"
 #define decimal_sNaNLiteral "sNaN"

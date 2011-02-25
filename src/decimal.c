@@ -444,7 +444,7 @@ void decimal_convertToDecimalExponential(char *result, decimal *number)
     kind = decimal_getKind(number);
     switch (kind) {
     case decimal_KindFinite:
-        *p++ = decimal_Digits[decimal_getSignificandDigit(number, 0)];
+        *p++ = decimal__Digits[decimal_getSignificandDigit(number, 0)];
         length = decimal_getLength(number);
         if (length > 1) {
             *p++ = '.';
@@ -520,7 +520,7 @@ static char *decimal_sprintDigits(char *buf, uint8_t *digits, uint32_t offset,
 
     p = buf;
     for (i = 0; i < count; ++i) {
-        *p++ = decimal_Digits[decimal_getDigit(digits, i + offset)];
+        *p++ = decimal__Digits[decimal_getDigit(digits, i + offset)];
     }
     return p;
 }
@@ -563,7 +563,7 @@ static char *decimal_sprintInt(char *buf, int32_t value)
     count = decimal_countDigitOfInt(value);
     rest = value < 0 ? -value : value;
     for (i = 0; i < count; ++i) {
-        p[count - 1 - i] = decimal_Digits[rest % 10];
+        p[count - 1 - i] = decimal__Digits[rest % 10];
         rest /= 10;
     }
     return p + count;
@@ -596,7 +596,7 @@ static bool decimal_isDigitChar(char ch)
 {
     const char *p;
 
-    for (p = decimal_Digits; *p; ++p) {
+    for (p = decimal__Digits; *p; ++p) {
         if (*p == ch) {
             return true;
         }
@@ -656,7 +656,7 @@ static void decimal_incrementMagnitude(decimal *number, DecimalContext *context)
 
     for (i = decimal_getLength(number) - 1; i >= 0; --i) {
         digit = decimal_getSignificandDigit(number, i) + 1;
-        if (digit < decimal_Radix) {
+        if (digit < decimal__Radix) {
             decimal_setSignificandDigit(number, i, digit);
             return;
         } else {
