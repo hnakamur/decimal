@@ -37,7 +37,7 @@ autogen_clean() {
         src/.deps src/config.h src/config.h.in src/Makefile src/Makefile.in \
         src/stamp-h1 \
         test/.deps test/Makefile test/Makefile.in
-    rm_if_empty COPYING INSTALL NEWS README AUTHORS ChangeLog
+#    rm_if_empty COPYING INSTALL NEWS README AUTHORS ChangeLog
 }
 
 rm_if_empty() {

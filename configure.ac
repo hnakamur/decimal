@@ -21,7 +21,6 @@ AC_CHECK_HEADERS([stdint.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
-AC_C_BIGENDIAN
 
 # Checks for library functions.
 

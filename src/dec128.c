@@ -7,89 +7,34 @@
 #define dec128__LeadSigMaskCase1 0x04
 #define dec128__LeadSigMaskCase2 0x1C
 
-#ifdef WORDS_BIGENDIAN
-
-#define dec128__ub0(n, i) ((n)->u[i] >> 24)
-#define dec128__ub1(n, i) (((n)->u[i] >> 16) & 0xFF)
-#define dec128__ub2(n, i) (((n)->u[i] >> 8) & 0xFF)
-#define dec128__ub3(n, i) ((n)->u[i] & 0xFF)
-
-#else
-
-#define dec128__ub0(n, i) ((n)->u[i] & 0xFF)
-#define dec128__ub1(n, i) (((n)->u[i] >> 8) & 0xFF)
-#define dec128__ub2(n, i) (((n)->u[i] >> 16) & 0xFF)
-#define dec128__ub3(n, i) ((n)->u[i] >> 24)
-
-#endif
-
 #define dec128__DigitCountPerDeclet 3
 #define dec128__DecletCount \
     ((dec128_Precision - 1) / dec128__DigitCountPerDeclet)
 
 #define dec128__isSigCase1(n) \
-    ((dec128__ub0(n, 0) & dec128__G1G2Mask) == dec128__G1G2Mask)
+    (((n)->byte[0] & dec128__G1G2Mask) == dec128__G1G2Mask)
 
 static uint32_t dec128__clength(dec128 *n);
 
-static int32_t getB00(dec128 *n)
+static dec128__isByteRangeAllZero(dec128 *n, int start, int end)
 {
-    return dec128__ub0(n, 0);
-}
+    int i;
 
-static int32_t getB01(dec128 *n)
-{
-    return dec128__ub1(n, 0);
-}
-
-static int32_t getB02(dec128 *n)
-{
-    return dec128__ub2(n, 0);
-}
-
-static int32_t getB03(dec128 *n)
-{
-    return dec128__ub3(n, 0);
-}
-
-static int32_t getB10(dec128 *n)
-{
-    return dec128__ub0(n, 1);
-}
-
-static int32_t getB11(dec128 *n)
-{
-    return dec128__ub1(n, 1);
-}
-
-static int32_t getB12(dec128 *n)
-{
-    return dec128__ub2(n, 1);
-}
-
-static int32_t getB13(dec128 *n)
-{
-    return dec128__ub3(n, 1);
-}
-
-static int32_t getC00(dec128c *n)
-{
-    return n->b[0];
-}
-
-static int32_t getC01(dec128c *n)
-{
-    return n->b[1];
+    for (i = start; i < end; ++i) {
+        if (n->byte[i] != 0) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool dec128_isZero(dec128 *n)
 {
     return dec128_isFinite(n)
         && dec128__isSigCase1(n)
-        && dec128__ub(n, 0) & dec128__LeadSigMaskCase1 == 0
-        && dec128__ub(n, 2) & dec128__TrailSigMask == 0
-        && dec128__ub(n, 3) == 0
-        && n->u[1] == 0 && n->u[2] == 0 && n->u[3] == 0;
+        && n->byte[0] & dec128__LeadSigMaskCase1 == 0
+        && n->byte[2] & dec128__TrailSigMask == 0
+        && dec128__isByteRangeAllZero(n, 3, dec128__ByteLength);
 }
 
 bool dec128_isNormal(dec128 *n)
@@ -119,17 +64,11 @@ bool dec128_isCanonical(dec128 *n)
 |0|1      7|8                                                            7|
 +-+--------+--------------------------------------------------------------+
 
-+------------------+-----------------+------------------+-----------------+
-|    unit[0]       |     unit[1]     |      unit[2]     |     unit[3]     |
-+------------------+-----------------+------------------+-----------------+
-|0                0|0               0|0                0|0               1|
-|0                3|3               6|6                9|9               2|
-|0                1|2               3|4                5|6               7|
-+------------------+-----------------+------------------+-----------------+
-byte      2     3     0  1  2    3      0   1    2   3     0    1    2  3
-|      |0  0|0    0|0  0|00|00|0    0|0  0|0  0|0 0|0  0|0   1|1  1|1 1|11|
-|      |1  2|2    3|3  3|44|45|5    6|6  7|7  7|8 8|8  9|9   0|0  1|1 1|22|
-|      |6  3|4    1|2  9|07|85|6    3|4  1|2  9|0 7|8  5|6   3|4  1|2 9|07|
+byte
+ 0   1    2     3     4  5  6    7      8   9   10   11   12    13  14  15
+|00|0 0|0  0|0    0|0  0|00|00|0    0|0  0|0  0|0 0|0  0|0   1|1  1|1 1|11|
+|00|0 1|1  2|2    3|3  3|44|45|5    6|6  7|7  7|8 8|8  9|9   0|0  1|1 1|22|
+|07|8 5|6  3|4    1|2  9|07|85|6    3|4  1|2  9|0 7|8  5|6   3|4  1|2 9|07|
 
 declet      0     1     2     3    4      5     6     7      8    9    10
 |         |0 0|0     0|0  0|0  0|0    0|0   0|0   0|0     0|0  1|1  1|1  1|
@@ -141,27 +80,27 @@ static int32_t dec128__getDeclet(dec128 *n, uint32_t offset)
 {
     switch (offset) {
     case 0:
-        return (dec128__ub2(n, 0) & 0x3F) << 4 | (dec128__ub3(n, 0) >> 4);
+        return (n->byte[2] & 0x3F) << 4 | (n->byte[3] >> 4);
     case 1:
-        return (dec128__ub2(n, 0) & 0x0F) << 2 | (dec128__ub0(n, 1) >> 2);
+        return (n->byte[3] & 0x0F) << 2 | (n->byte[4] >> 2);
     case 2:
-        return (dec128__ub0(n, 1) & 0x03) << 8 | dec128__ub1(n, 1);
+        return (n->byte[4] & 0x03) << 8 | n->byte[5];
     case 3:
-        return dec128__ub2(n, 1) << 6 | dec128__ub3(n, 1) >> 6;
+        return n->byte[6] << 6 | n->byte[7] >> 6;
     case 4:
-        return (dec128__ub3(n, 1) & 0x3F) << 4 | (dec128__ub0(n, 2) >> 4);
+        return (n->byte[7] & 0x3F) << 4 | (n->byte[8] >> 4);
     case 5:
-        return (dec128__ub0(n, 2) & 0x0F) << 2 | (dec128__ub1(n, 2) >> 2);
+        return (n->byte[8] & 0x0F) << 2 | (n->byte[9] >> 2);
     case 6:
-        return (dec128__ub1(n, 2) & 0x03) << 8 | dec128__ub2(n, 2);
+        return (n->byte[9] & 0x03) << 8 | n->byte[10];
     case 7:
-        return dec128__ub3(n, 2) << 6 | dec128__ub0(n, 3) >> 6;
+        return n->byte[11] << 6 | n->byte[12] >> 6;
     case 8:
-        return (dec128__ub0(n, 3) & 0x3F) << 4 | (dec128__ub1(n, 3) >> 4);
+        return (n->byte[12] & 0x3F) << 4 | (n->byte[13] >> 4);
     case 9:
-        return (dec128__ub1(n, 3) & 0x0F) << 2 | (dec128__ub2(n, 3) >> 2);
+        return (n->byte[13] & 0x0F) << 2 | (n->byte[14] >> 2);
     case 10:
-        return (dec128__ub2(n, 3) & 0x03) << 8 | dec128__ub3(n, 3);
+        return (n->byte[14] & 0x03) << 8 | n->byte[15];
     default:
         return -1;
     }
@@ -174,9 +113,7 @@ static uint32_t dec128__clength(dec128 *n)
     int32_t declet;
     int32_t digit[dec128__DigitCountPerDeclet];
 
-    if (dec128__isSigCase1(n)
-        || (dec128__ub0(n, 0) & dec128__LeadSigMaskCase2) != 0
-    ) {
+    if (dec128__isSigCase1(n) || (n->byte[0] & dec128__LeadSigMaskCase2)) {
         return dec128_Precision;
     }
 
@@ -197,21 +134,10 @@ static uint32_t dec128__clength(dec128 *n)
 
 static int32_t dec128__getExponent(dec128 *n)
 {
-    int32_t leadBits = dec128__isSigCase1(n) 
-        ? dec128__ub0(n, 0) >> 3 & 0x3
-        : dec128__ub0(n, 0) >> 5 & 0x3;
-    int32_t b1 = (dec128__ub0(n, 0) & 0x3);
-    int32_t b2 = dec128__ub1(n, 0);
-    int32_t b3 = dec128__ub2(n, 0);
-    int32_t e = (leadBits << 12
-        | (dec128__ub0(n, 0) & 0x3) << 10
-        | dec128__ub1(n, 0) << 2
-        | dec128__ub2(n, 0) >> 6);
-
-    return (leadBits << 12
-        | (dec128__ub0(n, 0) & 0x3) << 10
-        | dec128__ub1(n, 0) << 2
-        | dec128__ub2(n, 0) >> 6)
+    return ((n->byte[0] >> (dec128__isSigCase1(n) ? 3 : 5) & 0x3) << 12
+        | (n->byte[0] & 0x3) << 10
+        | n->byte[1] << 2
+        | n->byte[2] >> 6)
         - dec128_Bias;
 }
 
@@ -222,32 +148,11 @@ static int32_t dec128__getExponent(dec128 *n)
  *  01 10 0001 1110
  *
  */
-/*
-+-+--------+--------------------------------------------------------------+
-|S|   G    |                            T                                 |
-+-+--------+--------------------------------------------------------------+
-|0|0      0|0                                                            1|
-|0|0      1|1                                                            2|
-|0|1      7|8                                                            7|
-+-+--------+--------------------------------------------------------------+
-
-+------------------+-----------------+------------------+-----------------+
-|    unit[0]       |     unit[1]     |      unit[2]     |     unit[3]     |
-+------------------+-----------------+------------------+-----------------+
-|0                0|0               0|0                0|0               1|
-|0                3|3               6|6                9|9               2|
-|0                1|2               3|4                5|6               7|
-+------------------+-----------------+------------------+-----------------+
-byte      2     3     0  1  2    3      0   1    2   3     0    1    2  3
-|00|0 0|0  0|0    0|0  0|00|00|0    0|0  0|0  0|0 0|0  0|0   1|1  1|1 1|11|
-|00|0 1|1  2|2    3|3  3|44|45|5    6|6  7|7  7|8 8|8  9|9   0|0  1|1 1|22|
-|07|8 5|6  3|4    1|2  9|07|85|6    3|4  1|2  9|0 7|8  5|6   3|4  1|2 9|07|
-*/
 static uint32_t dec128__getLeadDigit(dec128 *n)
 {
     return dec128__isSigCase1(n) 
-        ? 8 | dec128__ub0(n, 0) >> 2 & 0x1
-        : dec128__ub0(n, 0) >> 2 & 0x7;
+        ? 8 | n->byte[0] >> 2 & 0x1
+        : n->byte[0] >> 2 & 0x7;
 }
 
 /*
@@ -310,7 +215,7 @@ bool dec128__wk_convertFromDec128(dec128__wk *result, const dec128 *n)
 bool dec128__initWithRawHexString(dec128 *n, const char *hex)
 {
     int len = strlen(hex);
-    char *dest = (char *)n->u;
+    uint8_t *dest = n->byte;
     int i;
     int hi;
     int lo;
