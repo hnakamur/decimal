@@ -1,12 +1,16 @@
 #ifndef _DECIMAL_INT_H
 #define _DECIMAL_INT_H 1
 
+#include <string.h>
 #include "decimal.h"
 
 #define decimal__Radix 10
 #define decimal__Digits "0123456789"
 #define decimal__HexDigits "0123456789ABCDEF"
 #define decimal__DigitCountPerDeclet 3
+
+bool decimal__isDigitChar(char ch);
+//#define decimal__isDigitChar(c) (strchr(decimal__Digits, (c)) != NULL)
 
 #define decimal_NaNLiteral "NaN"
 #define decimal_sNaNLiteral "sNaN"
@@ -50,7 +54,12 @@ void decimal_setQNaN(decimal *number);
 void decimal_round(decimal *result, const decimal *number,
     DecimalContext *context);
 
-int32_t decimal__encodeDPD(const int32_t *digit);
-void decimal__decodeDPD(int32_t *digit, int32_t dpd);
+int32_t decimal__encodeDecletFromDigits(const int32_t *digit);
+void decimal__decodeDecletToDigits(int32_t *digit, int32_t declet);
+int32_t decimal__encodeDecletFromInt(int32_t value);
+int32_t decimal__decodeDecletToInt(int32_t declet);
+
+#define decimal__isCanonicalDeclet(declet) (((declet) & 0x30) == 0)
+bool decimal__isDigitString(const char *str);
 
 #endif /* _DECIMAL_INT_H */

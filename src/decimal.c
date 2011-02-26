@@ -11,10 +11,8 @@ static char *decimal_sprintInt(char *buf, int32_t value);
 static void decimal_clearSignificand(decimal *number);
 static bool decimal_strncasematch(const char *target, const char *str_upper,
     const char *str_lower, uint32_t count);
-static bool decimal_isDigitChar(char ch);
 static void decimal_setDigitsWithChars(decimal *number, const char *chars,
     uint32_t count);
-static bool decimal_isDigitsStr(const char *str);
 static void decimal_setDigitsWithStr(decimal *number, const char *str);
 
 static void decimal_zeroDigits(decimal *number, uint32_t offset,
@@ -173,7 +171,7 @@ bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
 
     decimal_clearSignificand(number);
 
-    if (decimal_isDigitChar(*p) || *p == '.') {
+    if (decimal__isDigitChar(*p) || *p == '.') {
         start = p;
         dot = NULL;
 
@@ -194,9 +192,9 @@ bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
 // 0. -> 0E0
 // .0 -> 0.0E0
 // . -> error
-            if (decimal_isDigitChar(*p)) {
+            if (decimal__isDigitChar(*p)) {
                 exponent_offset = -(p - dot);
-                while (decimal_isDigitChar(*p)) {
+                while (decimal__isDigitChar(*p)) {
                     decimal_setSignificandDigit(number, digit_pos++,
                         *p++ - '0');
                 }
@@ -211,7 +209,7 @@ bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
                 }
             }
         } else {
-            while (decimal_isDigitChar(*p)) {
+            while (decimal__isDigitChar(*p)) {
                 decimal_setSignificandDigit(number, digit_pos++, *p++ - '0');
             }
             if (digit_pos > 0) {
@@ -219,7 +217,7 @@ bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
             }
             if (*p == '.') {
                 ++p;
-                while (decimal_isDigitChar(*p)) {
+                while (decimal__isDigitChar(*p)) {
                     decimal_setSignificandDigit(number, digit_pos++,
                         *p++ - '0');
                 }
@@ -239,7 +237,7 @@ bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
                 ++p;
             }
 
-            if (decimal_isDigitsStr(p)) {
+            if (decimal__isDigitString(p)) {
                 exponent = atoi(p); // FIXME check range
                 if (exponent_negative) {
                     exponent = -exponent;
@@ -275,7 +273,7 @@ bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
             decimal_setKind(number, decimal_KindNaN);
             decimal_resetSignaling(number);
             decimal_setLength(number, 0);
-        } else if (decimal_isDigitsStr(p)) {
+        } else if (decimal__isDigitString(p)) {
             decimal_setKind(number, decimal_KindNaN);
             decimal_resetSignaling(number);
             decimal_setDigitsWithStr(number, p);
@@ -288,7 +286,7 @@ bool decimal_convertFromDecimalCharacter(decimal *number, const char *str)
             decimal_setKind(number, decimal_KindNaN);
             decimal_setSignaling(number);
             decimal_setLength(number, 0);
-        } else if (decimal_isDigitsStr(p)) {
+        } else if (decimal__isDigitString(p)) {
             decimal_setKind(number, decimal_KindNaN);
             decimal_setSignaling(number);
             decimal_setDigitsWithStr(number, p);
@@ -592,7 +590,7 @@ static bool decimal_strncasematch(const char *target, const char *str_upper,
     return true;
 }
 
-static bool decimal_isDigitChar(char ch)
+bool decimal__isDigitChar(char ch)
 {
     const char *p;
 
@@ -604,10 +602,10 @@ static bool decimal_isDigitChar(char ch)
     return false;
 }
 
-static bool decimal_isDigitsStr(const char *str)
+bool decimal__isDigitString(const char *str)
 {
     for (; *str; ++str) {
-        if (!decimal_isDigitChar(*str)) {
+        if (!decimal__isDigitChar(*str)) {
             return false;
         }
     }

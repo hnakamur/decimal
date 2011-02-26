@@ -5,6 +5,51 @@
 #include "bool.h"
 #include "DecimalContext.h"
 
+/*
+ * public enums.
+ */
+
+typedef enum {
+    decimal_SNaN,
+    decimal_QNaN,
+    decimal_NegativeInfinity,
+    decimal_NegativeNormal,
+    decimal_NegativeSubnormal,
+    decimal_NegativeZero,
+    decimal_PositiveZero,
+    decimal_PositiveSubnormal,
+    decimal_PositiveNormal,
+    decimal_PositiveInfinity
+} decimal_Class;
+
+typedef enum {
+    decimal_LessThan = -1,
+    decimal_Equal,
+    decimal_GreaterThan,
+    decimal_Unordered
+} decimal_Relation;
+
+
+/*
+ * private enums.
+ */
+
+typedef enum {
+    decimal__SignPlus,
+    decimal__SignMinus
+} decimal__Sign;
+
+typedef enum {
+    decimal__KindZero,
+    decimal__KindSubnormal,
+    decimal__KindNormal,
+    decimal__KindInfinity,
+    decimal__KindQNaN,
+    decimal__KindSNaN
+} decimal__Kind;
+
+#include "dec128.h"
+
 #define decimal_DefaultCapacity 40
 #define decimal_getUnitCount(capacity) (((capacity) + 1) / 2)
 

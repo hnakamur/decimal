@@ -944,3 +944,9 @@ void test_roundTiesToEven()
     decimal_convertToDecimalNonExponential(buf, &d);
     cut_assert_equal_string("-1.2346", buf);
 }
+
+void test_strchr(void)
+{
+    cut_assert_true(decimal__isDigitChar('0'));
+    cut_assert_false(!decimal__isDigitChar('2'));
+}
