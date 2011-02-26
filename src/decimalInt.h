@@ -61,5 +61,7 @@ int32_t decimal__decodeDecletToInt(int32_t declet);
 
 #define decimal__isCanonicalDeclet(declet) (((declet) & 0x30) == 0)
 bool decimal__isDigitString(const char *str);
+char *decimal__sprintInt(char *buf, int value);
+char *decimal_padZero(char *buf, int count);
 
 #endif /* _DECIMAL_INT_H */

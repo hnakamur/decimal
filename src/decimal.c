@@ -5,9 +5,7 @@
 
 static char *decimal_sprintDigits(char *buf, uint8_t *digits, uint32_t offset,
     uint32_t count);
-static char *decimal_padZero(char *buf, uint32_t count);
 static char *decimal_strncpy(char *buf, const char *source, uint32_t count);
-static char *decimal_sprintInt(char *buf, int32_t value);
 static void decimal_clearSignificand(decimal *number);
 static bool decimal_strncasematch(const char *target, const char *str_upper,
     const char *str_lower, uint32_t count);
@@ -453,7 +451,7 @@ void decimal_convertToDecimalExponential(char *result, decimal *number)
         if (exponent >= 0) {
             *p++ = '+';
         }
-        p = decimal_sprintInt(p, exponent);
+        p = decimal__sprintInt(p, exponent);
         break;
     case decimal_KindInfinite:
         p = decimal_strncpy(p, decimal_InfinityLiteral,
@@ -523,7 +521,7 @@ static char *decimal_sprintDigits(char *buf, uint8_t *digits, uint32_t offset,
     return p;
 }
 
-static char *decimal_padZero(char *buf, uint32_t count)
+char *decimal_padZero(char *buf, int count)
 {
     for (; count > 0; --count) {
         *buf++ = '0';
@@ -546,12 +544,12 @@ uint32_t decimal_countDigitOfInt(int32_t value)
     return count;
 }
 
-static char *decimal_sprintInt(char *buf, int32_t value)
+char *decimal__sprintInt(char *buf, int value)
 {
     char *p;
-    uint32_t count;
-    uint32_t i;
-    int32_t rest;
+    int count;
+    int i;
+    int rest;
 
     p = buf;
     if (value < 0) {

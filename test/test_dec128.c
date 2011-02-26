@@ -122,3 +122,90 @@ void test_dec128_convertFromDecimalString(void)
     dec128__convertToRawHexString(buf, &d);
     cut_assert_equal_string("A205C0000000000000000000000003D0", buf);
 }
+
+void test_dec128_convertToExponentialDecimalString(void)
+{
+    dec128 d;
+    DecimalContext ctx;
+    char buf[256];
+
+    dec128__initWithRawHexString(&d, "A20780000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E+0", buf);
+
+    dec128__initWithRawHexString(&d, "A20840000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E+3", buf);
+
+    dec128__initWithRawHexString(&d, "A20800000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E+2", buf);
+
+    dec128__initWithRawHexString(&d, "A207C0000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E+1", buf);
+
+    dec128__initWithRawHexString(&d, "A20740000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E-1", buf);
+
+    dec128__initWithRawHexString(&d, "A20700000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E-2", buf);
+
+    dec128__initWithRawHexString(&d, "A20680000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E-4", buf);
+
+    dec128__initWithRawHexString(&d, "A20600000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E-6", buf);
+
+    dec128__initWithRawHexString(&d, "A205c0000000000000000000000003D0");
+    dec128_convertToExponentialDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50E-7", buf);
+}
+
+void test_dec128_convertToOrdinaryDecimalString(void)
+{
+    dec128 d;
+    DecimalContext ctx;
+    char buf[256];
+
+    dec128__initWithRawHexString(&d, "A20780000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7.50", buf);
+
+    dec128__initWithRawHexString(&d, "A20840000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-7500", buf);
+
+    dec128__initWithRawHexString(&d, "A20800000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-750", buf);
+
+    dec128__initWithRawHexString(&d, "A207C0000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-75.0", buf);
+
+    dec128__initWithRawHexString(&d, "A20740000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-0.750", buf);
+
+    dec128__initWithRawHexString(&d, "A20700000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-0.0750", buf);
+
+    dec128__initWithRawHexString(&d, "A20680000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-0.000750", buf);
+
+    dec128__initWithRawHexString(&d, "A20600000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-0.00000750", buf);
+
+    dec128__initWithRawHexString(&d, "A205c0000000000000000000000003D0");
+    dec128_convertToOrdinaryDecimalString(buf, &d, &ctx);
+    cut_assert_equal_string("-0.000000750", buf);
+}
+

@@ -24,6 +24,11 @@ static decimal_Class dec128_getClassFromSignAndKind(decimal__Sign sign,
 
 static void dec128__wk_convertToDec128(dec128 *result, const dec128__wk *x);
 
+static void dec128__wk_convertToExponentialDecimalNotation(char *result,
+    const dec128__wk *x);
+static void dec128__wk_convertToOrdinaryDecimalNotation(char *result,
+    const dec128__wk *x);
+
 bool dec128_is754version1985(void)
 {
     return false;
@@ -128,10 +133,9 @@ static bool dec128__hasAllZeroBytesInRange(const dec128 *x, int start, int end)
     return true;
 }
 
-static bool dec128__hasAllZeroDigits(const dec128 *x)
+static bool dec128__hasAllZeroTrailingDigits(const dec128 *x)
 {
-    return dec128__getLeadDigit(x) == 0
-        && (x->byte[2] & dec128__TrailSigMask) == 0
+    return (x->byte[2] & dec128__TrailSigMask) == 0
         && dec128__hasAllZeroBytesInRange(x, 3, dec128__ByteLength);
 }
 
@@ -181,7 +185,9 @@ decimal_Class dec128_getClass(const dec128 *x)
 decimal__Kind dec128__getKind(const dec128 *x)
 {
     if (dec128_isFinite(x)) {
-        if (dec128__hasAllZeroDigits(x)) {
+        if (dec128__getLeadDigit(x) == 0
+            && dec128__hasAllZeroTrailingDigits(x)
+        ) {
             return decimal__KindZero;
         } else if (dec128__getE(x) <= dec128_EMin
             && dec128__getLeadDigit(x) == 0
@@ -197,17 +203,6 @@ decimal__Kind dec128__getKind(const dec128 *x)
     } else if (dec128_isNaN(x)) {
         return decimal__KindQNaN;
     }
-}
-
-void dec128_convertFromDecimalString(dec128 *result, const char *str,
-    DecimalContext *ctx)
-{
-    dec128__wk w;
-
-    if (!dec128__wk_convertFromDecimalCharacter(&w, str)) {
-        return;
-    }
-    dec128__wk_convertToDec128(result, &w);
 }
 
 /*
@@ -354,6 +349,35 @@ void dec128__convertToRawHexString(char *result, const dec128 *x)
     }
 }
 
+void dec128_convertFromDecimalString(dec128 *result, const char *str,
+    DecimalContext *ctx)
+{
+    dec128__wk w;
+
+    if (!dec128__wk_convertFromDecimalCharacter(&w, str)) {
+        return;
+    }
+    dec128__wk_convertToDec128(result, &w);
+}
+
+void dec128_convertToExponentialDecimalString(char *buf, const dec128 *x,
+    DecimalContext *ctx)
+{
+    dec128__wk w;
+
+    dec128__wk_convertFromDec128(&w, x);
+    dec128__wk_convertToExponentialDecimalNotation(buf, &w);
+}
+
+void dec128_convertToOrdinaryDecimalString(char *buf, const dec128 *x,
+    DecimalContext *ctx)
+{
+    dec128__wk w;
+
+    dec128__wk_convertFromDec128(&w, x);
+    dec128__wk_convertToOrdinaryDecimalNotation(buf, &w);
+}
+
 /*
  * memo
  * a = a1 * 100 + a2 (0 <= a1 < 100, 0 <= a2 < 100)
@@ -475,7 +499,9 @@ bool dec128__wk_convertFromDecimalCharacter(dec128__wk *result,
     }
 
     if (decimal__isDigitChar(*p) || *p == '.') {
+        // FIXME: care for subnormal case
         result->kind = decimal__KindNormal;
+
         memset(result->c, '0', dec128_Precision + 1);
 
         start = p;
@@ -625,4 +651,169 @@ bool dec128__wk_convertFromDecimalCharacter(dec128__wk *result,
         return false;
     } 
     return true;
+}
+
+static bool dec128__wk_hasAllZeroDigitsInRange(const dec128__wk *x, int start,
+    int end)
+{
+    int i;
+
+    for (i = start; i < end; ++i) {
+        if (dec128__wk_getDigit(x, i)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static void dec128__wk_convertToOrdinaryDecimalNotation(char *result,
+    const dec128__wk *x)
+{
+    char *p;
+    int sigLen;
+    int32_t dotPos;
+
+    p = result;
+    if (x->sign == decimal__SignMinus) {
+        *p++ = '-';
+    }
+
+    switch (x->kind) {
+    case decimal__KindNormal:
+    case decimal__KindSubnormal:
+        sigLen = dec128__wk_countSignificantDigit(x);
+        dotPos = x->q + dec128_Precision;
+// 1230E+1 = 12300
+// 1230E+0 = 1230
+// 1230E-1 = 123.0
+// 1230E-2 = 12.30
+// 1230E-3 = 1.230
+// 1230E-4 = 0.1230
+// 1230E-5 = 0.01230
+// 1230E-6 = 0.001230
+        if (dotPos > dec128_Precision - sigLen) {
+            if (dotPos < dec128_Precision) {
+                strncpy(p, x->c + dec128_Precision - sigLen,
+                    dotPos - (dec128_Precision - sigLen));
+                p += dotPos - (dec128_Precision - sigLen);
+                *p++ = '.';
+                strncpy(p, x->c + dotPos, dec128_Precision - dotPos);
+                p += dec128_Precision - dotPos;
+            } else if (dotPos > dec128_Precision) {
+                strncpy(p, x->c + dec128_Precision - sigLen, sigLen);
+                p += sigLen;
+                p = decimal_padZero(p, dotPos - dec128_Precision);
+            } else {
+                strncpy(p, x->c + dec128_Precision - sigLen, sigLen);
+                p += sigLen;
+            }
+        } else {
+            *p++ = '0';
+            *p++ = '.';
+            if (dotPos < dec128_Precision - sigLen) {
+                p = decimal_padZero(p, dec128_Precision - sigLen - dotPos);
+            }
+            strncpy(p, x->c + dec128_Precision - sigLen, sigLen);
+            p += sigLen;
+        }
+        break;
+    case decimal__KindInfinity:
+        p = strncpy(p, decimal_InfinityLiteral,
+            sizeof(decimal_InfinityLiteral) - 1);
+        p += sizeof(decimal_InfinityLiteral) - 1;
+        break;
+    case decimal__KindQNaN:
+        p = strncpy(p, decimal_NaNLiteral, sizeof(decimal_NaNLiteral) - 1);
+        p += sizeof(decimal_NaNLiteral) - 1;
+        if (!dec128__wk_hasAllZeroDigitsInRange(x, 1, dec128_Precision)) {
+            sigLen = dec128__wk_countSignificantDigit(x);
+            strncpy(p, x->c + dec128_Precision - sigLen, sigLen);
+            p += sigLen;
+        }
+        break;
+    case decimal__KindSNaN:
+        p = strncpy(p, decimal_sNaNLiteral, sizeof(decimal_sNaNLiteral) - 1);
+        p += sizeof(decimal_sNaNLiteral) - 1;
+        if (!dec128__wk_hasAllZeroDigitsInRange(x, 1, dec128_Precision)) {
+            sigLen = dec128__wk_countSignificantDigit(x);
+            strncpy(p, x->c + dec128_Precision - sigLen, sigLen);
+            p += sigLen;
+        }
+        break;
+    }
+    *p = '\0';
+}
+
+static void dec128__wk_convertToExponentialDecimalNotation(char *result,
+    const dec128__wk *x)
+{
+    char *p;
+    uint32_t kind;
+    uint32_t length;
+    int32_t exponent;
+    int sigLen;
+
+    p = result;
+    if (x->sign == decimal__SignMinus) {
+        *p++ = '-';
+    }
+
+    switch (x->kind) {
+    case decimal__KindNormal:
+    case decimal__KindSubnormal:
+//c='0'*31 "750", q=-2 -> 7.50E+0
+//c='0'*31 "750", q=-1 -> 7.50E+1
+//c='0'*31 "750", q=-5 -> 7.50E-3
+
+        sigLen = dec128__wk_countSignificantDigit(x);
+        *p++ = x->c[dec128_Precision - sigLen];
+        if (sigLen > 1) {
+            *p++ = '.';
+            strncpy(p, x->c + dec128_Precision - (sigLen - 1), sigLen - 1);
+            p += sigLen - 1;
+        }
+        *p++ = 'E';
+        exponent = x->q + sigLen - 1;
+        if (exponent >= 0) {
+            *p++ = '+';
+        }
+        p = decimal__sprintInt(p, exponent);
+        break;
+    case decimal__KindInfinity:
+        p = strncpy(p, decimal_InfinityLiteral,
+            sizeof(decimal_InfinityLiteral) - 1);
+        p += sizeof(decimal_InfinityLiteral) - 1;
+        break;
+    case decimal__KindQNaN:
+        p = strncpy(p, decimal_NaNLiteral, sizeof(decimal_NaNLiteral) - 1);
+        p += sizeof(decimal_NaNLiteral) - 1;
+        if (!dec128__wk_hasAllZeroDigitsInRange(x, 1, dec128_Precision)) {
+            sigLen = dec128__wk_countSignificantDigit(x);
+            strncpy(p, x->c + dec128_Precision - sigLen, sigLen);
+            p += sigLen;
+        }
+        break;
+    case decimal__KindSNaN:
+        p = strncpy(p, decimal_sNaNLiteral, sizeof(decimal_sNaNLiteral) - 1);
+        p += sizeof(decimal_sNaNLiteral) - 1;
+        if (!dec128__wk_hasAllZeroDigitsInRange(x, 1, dec128_Precision)) {
+            sigLen = dec128__wk_countSignificantDigit(x);
+            strncpy(p, x->c + dec128_Precision - sigLen, sigLen);
+            p += sigLen;
+        }
+        break;
+    }
+    *p = '\0';
+}
+
+int dec128__wk_countSignificantDigit(const dec128__wk *x)
+{
+    int i;
+
+    for (i = 0; i < dec128_Precision; ++i) {
+        if (dec128__wk_getDigit(x, i)) {
+            return dec128_Precision - i;
+        }
+    }
+    return 1;
 }

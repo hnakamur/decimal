@@ -79,8 +79,8 @@ void dec128_convertFromDouble(dec128 *result, double x, DecimalContext *ctx);
 double dec128_convertToDouble(const dec128 *x, DecimalContext *ctx);
 
 void dec128_convertFromDecimalString(dec128 *result, const char *str, DecimalContext *ctx);
-uint32_t dec128_calcDecimalStringLength(const dec128 *x, DecimalContext *ctx);
-void dec128_convertToDecimalString(const char *buf, const dec128 *x, DecimalContext *ctx);
+int dec128_calcDecimalStringLength(const dec128 *x, DecimalContext *ctx);
+void dec128_convertToDecimalString(char *buf, const dec128 *x, DecimalContext *ctx);
 
 void dec128_convertFromHexString(dec128 *result, const char *str, DecimalContext *ctx);
 uint32_t dec128_calcHexStringLength(const dec128 *x, DecimalContext *ctx);
@@ -118,6 +118,15 @@ void dec128__setSNaN(dec128 *x, const char *payload);
 void dec128__setQAndLeadDigit(dec128 *x, int32_t q, uint32_t leadDigit);
 
 /*
+ * temporary functions.
+ * will be removed soon.
+ */
+void dec128_convertToExponentialDecimalString(char *buf, const dec128 *x,
+    DecimalContext *ctx);
+void dec128_convertToOrdinaryDecimalString(char *buf, const dec128 *x,
+    DecimalContext *ctx);
+
+/*
  * dec128 work
  */
 typedef struct {
@@ -135,5 +144,6 @@ void dec128__wk_convertFromDec128(dec128__wk *result, const dec128 *x);
 decimal_Class dec128__wk_getClass(const dec128__wk *x);
 bool dec128__wk_convertFromDecimalCharacter(dec128__wk *result,
     const char *str);
+int dec128__wk_countSignificantDigit(const dec128__wk *x);
 
 #endif /* _DEC128_H_ */
