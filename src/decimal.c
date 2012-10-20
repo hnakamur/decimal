@@ -1,7 +1,187 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "decimalInt.h"
+#include "decimal.h"
+
+
+decimal_Class decimal__getClassFromSignAndKind(decimal__Sign sign, 
+    decimal__Kind kind)
+{
+    if (kind == decimal__KindNormal) {
+        return sign == decimal__SignMinus
+            ? decimal_NegativeNormal : decimal_PositiveNormal;
+    } else if (kind == decimal__KindSubnormal) {
+        return sign == decimal__SignMinus
+            ? decimal_NegativeSubnormal : decimal_PositiveSubnormal;
+    } else if (kind == decimal__KindZero) {
+        return sign == decimal__SignMinus
+            ? decimal_NegativeZero : decimal_PositiveZero;
+    } else if (kind == decimal__KindInfinity) {
+        return sign == decimal__SignMinus
+            ? decimal_NegativeInfinity : decimal_PositiveInfinity;
+    } else if (kind == decimal__KindQNaN) {
+        return decimal_QNaN;
+    } else if (kind == decimal__KindSNaN) {
+        return decimal_SNaN;
+    }
+}
+
+decimal_Class decimal_getClass(const decimal *x)
+{
+    return decimal__getClassFromSignAndKind(x->sign, x->kind);
+}
+
+/*
+ * utility functions.
+ */
+decimal *decimal_mallocDecimal(int prec)
+{
+    return (decimal *)malloc(decimal_calcSize(prec));
+}
+
+decimal *decimal_reallocDecimal(decimal *x, int prec)
+{
+    return (decimal *)realloc(x, decimal_calcSize(prec));
+}
+
+void decimal_freeDecimal(decimal *x)
+{
+    free(x);
+}
+
+void decimal_setPrecAndEmax(decimal *x, int prec, int emax)
+{
+    x->prec = prec;
+    x->emax = emax;
+}
+
+int decimal__getDigitInDeclet(int declet, int pos)
+{
+    switch (pos) {
+    case 0:
+        return decimal__getLoDigitInDeclet(declet);
+    case 1:
+        return decimal__getMidDigitInDeclet(declet);
+    case 2:
+        return decimal__getHiDigitInDeclet(declet);
+    }
+}
+
+int decimal__getDigit(decimal *x, int pos)
+{
+    int declet = x->unit[pos / decimal_DigitCountPerUnit];
+    return decimal__getDigitInDeclet(declet, pos % decimal_DigitCountPerUnit);
+}
+
+void decimal__setDigit(decimal *x, int pos, int digit)
+{
+    int unitPos = pos / decimal_DigitCountPerUnit;
+    int digitPos = pos % decimal_DigitCountPerUnit;
+    int oldDigit = decimal__getDigitInDeclet(x->unit[unitPos], digitPos);
+    switch (digitPos) {
+    case 0:
+        x->unit[unitPos] += digit - oldDigit;
+        break;
+    case 1:
+        x->unit[unitPos] += (digit - oldDigit) * 10;
+        break;
+    case 2:
+        x->unit[unitPos] += (digit - oldDigit) * 100;
+        break;
+    }
+}
+
+int decimal__getTrailingZeroCount(decimal *x)
+{
+    int count = 0;
+    int i;
+    int digit;
+
+    for (i = 0; i < decimal_getDigitCount(x); ++i) {
+        digit = decimal__getDigit(x, i);
+        if (digit) {
+            break;
+        } else {
+            ++count;
+        }
+    }
+    return count;
+}
+
+#if 0
+int decimal_isZero(decimal *x)
+{
+    return decimal__getTrailingZeroCount(x) == decimal_getDigitCount(x);
+}
+#endif
+
+bool decimal__isDigitChar(char ch)
+{
+    const char *p;
+
+    for (p = decimal__Digits; *p; ++p) {
+        if (*p == ch) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool decimal__isDigitString(const char *str)
+{
+    for (; *str; ++str) {
+        if (!decimal__isDigitChar(*str)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+char *decimal_padZero(char *buf, int count)
+{
+    for (; count > 0; --count) {
+        *buf++ = '0';
+    }
+    return buf;
+}
+
+char *decimal__sprintInt(char *buf, int value)
+{
+    char *p;
+    int count;
+    int i;
+    int rest;
+
+    p = buf;
+    if (value < 0) {
+        *p++ = '-';
+    }
+
+    count = decimal_countDigitOfInt(value);
+    rest = value < 0 ? -value : value;
+    for (i = 0; i < count; ++i) {
+        p[count - 1 - i] = decimal__Digits[rest % 10];
+        rest /= 10;
+    }
+    return p + count;
+}
+
+uint32_t decimal_countDigitOfInt(int32_t value)
+{
+    uint32_t count;
+
+    if (value == 0) {
+        return 1;
+    }
+
+    count = 0;
+    for (; value; value /= 10) {
+        ++count;
+    }
+    return count;
+}
+
+#if 0
 
 static char *decimal_sprintDigits(char *buf, uint8_t *digits, uint32_t offset,
     uint32_t count);
@@ -521,50 +701,6 @@ static char *decimal_sprintDigits(char *buf, uint8_t *digits, uint32_t offset,
     return p;
 }
 
-char *decimal_padZero(char *buf, int count)
-{
-    for (; count > 0; --count) {
-        *buf++ = '0';
-    }
-    return buf;
-}
-
-uint32_t decimal_countDigitOfInt(int32_t value)
-{
-    uint32_t count;
-
-    if (value == 0) {
-        return 1;
-    }
-
-    count = 0;
-    for (; value; value /= 10) {
-        ++count;
-    }
-    return count;
-}
-
-char *decimal__sprintInt(char *buf, int value)
-{
-    char *p;
-    int count;
-    int i;
-    int rest;
-
-    p = buf;
-    if (value < 0) {
-        *p++ = '-';
-    }
-
-    count = decimal_countDigitOfInt(value);
-    rest = value < 0 ? -value : value;
-    for (i = 0; i < count; ++i) {
-        p[count - 1 - i] = decimal__Digits[rest % 10];
-        rest /= 10;
-    }
-    return p + count;
-}
-
 static char *decimal_strncpy(char *buf, const char *source, uint32_t count)
 {
     uint32_t i;
@@ -582,28 +718,6 @@ static bool decimal_strncasematch(const char *target, const char *str_upper,
 
     for (i = 0; i < count; ++i) {
         if (!(target[i] == str_upper[i] || target[i] == str_lower[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool decimal__isDigitChar(char ch)
-{
-    const char *p;
-
-    for (p = decimal__Digits; *p; ++p) {
-        if (*p == ch) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool decimal__isDigitString(const char *str)
-{
-    for (; *str; ++str) {
-        if (!decimal__isDigitChar(*str)) {
             return false;
         }
     }
@@ -874,3 +988,15 @@ static void decimal_setLargestFiniteMagnitude(decimal *number,
     decimal_zeroDigits(number, precision,
         decimal_getCapacity(number) - precision);
 }
+#endif
+
+/*
+ 
+1.23E2 + 2.54E3
+1.23E2 + 25.4E2
+
+ 9
+ 9
+12
+
+*/

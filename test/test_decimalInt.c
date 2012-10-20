@@ -1,6 +1,7 @@
 #include <cutter.h>
 #include "decimalInt.h"
 
+#if 0
 void test_countDigitOfInt(void)
 {
     cut_assert_equal_uint(1, decimal_countDigitOfInt(0));
@@ -950,3 +951,4 @@ void test_strchr(void)
     cut_assert_true(decimal__isDigitChar('0'));
     cut_assert_false(!decimal__isDigitChar('2'));
 }
+#endif

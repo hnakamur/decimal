@@ -19,9 +19,6 @@ static uint32_t dec128__getLeadDigit(const dec128 *n);
 static int32_t dec128__getDeclet(const dec128 *n, uint32_t offset);
 static void dec128__setDeclet(dec128 *x, uint32_t offset, int32_t declet);
 
-static decimal_Class dec128_getClassFromSignAndKind(decimal__Sign sign, 
-    decimal__Kind kind);
-
 static void dec128__wk_convertToDec128(dec128 *result, const dec128__wk *x);
 
 static void dec128__wk_convertToExponentialDecimalNotation(char *result,
@@ -153,33 +150,11 @@ bool dec128_isCanonical(const dec128 *x)
     return true;
 }
 
-static decimal_Class dec128__getClassFromSignAndKind(decimal__Sign sign, 
-    decimal__Kind kind)
-{
-    if (kind == decimal__KindNormal) {
-        return sign == decimal__SignMinus
-            ? decimal_NegativeNormal : decimal_PositiveNormal;
-    } else if (kind == decimal__KindSubnormal) {
-        return sign == decimal__SignMinus
-            ? decimal_NegativeSubnormal : decimal_PositiveSubnormal;
-    } else if (kind == decimal__KindZero) {
-        return sign == decimal__SignMinus
-            ? decimal_NegativeZero : decimal_PositiveZero;
-    } else if (kind == decimal__KindInfinity) {
-        return sign == decimal__SignMinus
-            ? decimal_NegativeInfinity : decimal_PositiveInfinity;
-    } else if (kind == decimal__KindQNaN) {
-        return decimal_QNaN;
-    } else if (kind == decimal__KindSNaN) {
-        return decimal_SNaN;
-    }
-}
-
 decimal_Class dec128_getClass(const dec128 *x)
 {
     decimal__Sign sign = dec128_isSignMinus(x)
         ? decimal__SignMinus : decimal__SignPlus;
-    return dec128__getClassFromSignAndKind(sign, dec128__getKind(x));
+    return decimal__getClassFromSignAndKind(sign, dec128__getKind(x));
 }
 
 decimal__Kind dec128__getKind(const dec128 *x)
@@ -432,7 +407,7 @@ void dec128__wk_convertFromDec128(dec128__wk *result, const dec128 *x)
 
 decimal_Class dec128__wk_getClass(const dec128__wk *x)
 {
-    return dec128__getClassFromSignAndKind(x->sign, x->kind);
+    return decimal__getClassFromSignAndKind(x->sign, x->kind);
 }
 
 static void dec128__wk_convertToDec128(dec128 *result, const dec128__wk *x)
